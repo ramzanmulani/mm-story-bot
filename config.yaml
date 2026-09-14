@@ -1,0 +1,106 @@
+# ---------------------------------------------------------------------------
+# MM Story Bot - configuration
+# Everything you might want to tune lives here. No code edits needed.
+# ---------------------------------------------------------------------------
+
+account:
+  # Public GitHub Pages origin that serves the normalised story videos.
+  # Leave BLANK - it is worked out from the repo automatically.
+  # Only fill it in if you put Pages on a custom domain.
+  pages_origin: ""
+
+targets:
+  # Where each picked clip gets posted. Same clip, same encode.
+  instagram: true          # Instagram story
+  facebook: true           # Facebook Page story (gone in 24h)
+  facebook_feed: true      # Facebook Page feed, as a Reel (stays forever)
+
+facebook:
+  # Which Facebook Page posts. Leave BLANK and it uses the Page your
+  # Instagram account is linked to - which is what you want.
+  # Only set this if you manage several Pages and want a different one.
+  page_id: ""
+
+  # Feed posts are PERMANENT, so they are rationed separately from stories.
+  # 1 = one Page Reel a day (the other 6 slots still post stories).
+  # 7 = every slot also posts to the feed. That is a lot of permanent posts.
+  feed_posts_per_day: 1
+
+  # Caption for the Page Reel. {caption} is the original post's caption,
+  # {permalink} is the Instagram link. Leave the footer empty to drop it.
+  feed_caption: "{caption}"
+  feed_caption_footer: |-
+
+    AnimBelt: https://mythicalmotions.com/animbelt
+    mythicalmotions.com
+
+source:
+  # Which of your own posts are eligible to be re-shared to Story.
+  # VIDEO covers both feed videos and Reels.
+  media_types: ["VIDEO"]
+
+  # Restrict further by product type. Empty list = allow all.
+  #   REELS  = reels
+  #   FEED   = plain feed video
+  product_types: ["REELS", "FEED"]
+
+  # Ignore anything older than this. 0 = no age limit.
+  max_age_days: 0
+
+  # Never re-share these media IDs (blocklist). Add IDs as strings.
+  exclude_media_ids: []
+
+  # How many of your posts to pull from the API (newest first).
+  max_library_size: 300
+
+rotation:
+  # Shuffle-bag: every eligible video is used exactly once before any repeats.
+  # When the bag empties it is refilled and reshuffled, skipping the most
+  # recently posted N so you never see the same clip twice in a row.
+  no_repeat_window: 10
+
+video:
+  # Story limits for BOTH platforms. Do not raise these.
+  # Instagram rejects anything over 60s; Facebook rejects anything under 3s.
+  max_duration_sec: 59
+  min_duration_sec: 3
+  max_filesize_mb: 95
+  width: 1080
+  height: 1920
+  fps: 30
+  video_bitrate: "4500k"
+  audio_bitrate: "128k"
+
+  # How a non-9:16 video is fitted into the 1080x1920 story frame:
+  #   blur  - video centred, blurred+darkened copy of itself behind it
+  #   pad   - video centred on a flat brand-colour background
+  #   crop  - fill the frame, cropping the overflow
+  fit: "blur"
+  pad_color: "#0E0E11"
+
+  # If a clip is longer than max_duration_sec, take the first N seconds.
+  # "start" = from 0s, "middle" = centred on the clip.
+  trim_from: "start"
+
+hosting:
+  # Keep hosted files this long so a slow Instagram fetch can still resolve.
+  retention_hours: 24
+  # How long to wait for GitHub Pages to serve a freshly pushed file.
+  pages_wait_sec: 240
+
+publish:
+  # Poll the Instagram container until it reports FINISHED.
+  container_poll_sec: 10
+  container_timeout_sec: 300
+
+  # If Pages never came up in time, publish the untouched original Instagram
+  # CDN url instead - only when the clip already meets story spec.
+  fallback_to_source_url: true
+
+  # Set false for a full end-to-end run that stops just before publishing.
+  enabled: true
+
+notify:
+  # Optional. If the DISCORD_WEBHOOK secret is set, post a line per run.
+  on_success: false
+  on_failure: true

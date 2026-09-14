@@ -1,0 +1,87 @@
+name: Post Instagram story
+
+# 7 stories a day, ~2 hours apart, so the account keeps re-entering the
+# story tray instead of getting one bump in the morning.
+# Cron is UTC. These are 10:00 / 12:00 / 14:00 / 16:00 / 18:00 / 20:00 / 22:00 IST.
+on:
+  schedule:
+    - cron: "30 4 * * *"    # 10:00 IST
+    - cron: "30 6 * * *"    # 12:00 IST
+    - cron: "30 8 * * *"    # 14:00 IST
+    - cron: "30 10 * * *"   # 16:00 IST
+    - cron: "30 12 * * *"   # 18:00 IST
+    - cron: "30 14 * * *"   # 20:00 IST
+    - cron: "30 16 * * *"   # 22:00 IST
+  workflow_dispatch:
+    inputs:
+      dry_run:
+        description: "Run everything except the final publish"
+        type: boolean
+        default: true
+
+# Two slots must never touch the rotation state or gh-pages at the same time.
+concurrency:
+  group: mm-story-bot
+  cancel-in-progress: false
+
+permissions:
+  contents: write
+
+jobs:
+  story:
+    runs-on: ubuntu-latest
+    timeout-minutes: 25
+
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: main
+          fetch-depth: 0
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+          cache: pip
+
+      - name: Install dependencies
+        run: pip install -r requirements.txt
+
+      - name: Ensure ffmpeg
+        run: |
+          # ffmpeg is no longer preinstalled on the ubuntu-24.04 runner image.
+          if ! command -v ffmpeg >/dev/null 2>&1; then
+            echo "ffmpeg is not on this runner image - installing it."
+            sudo apt-get update -qq
+            sudo apt-get install -y -qq ffmpeg
+          fi
+          # No pipe here: a pipeline would return head's exit code, not ffmpeg's,
+          # which is exactly how the missing binary slipped through before.
+          command -v ffmpeg
+          ffmpeg -version | head -n 1
+
+      - name: Post story
+        env:
+          IG_USER_ID: ${{ secrets.IG_USER_ID }}
+          IG_ACCESS_TOKEN: ${{ secrets.IG_ACCESS_TOKEN }}
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          DISCORD_WEBHOOK: ${{ secrets.DISCORD_WEBHOOK }}
+          DRY_RUN: ${{ github.event_name == 'workflow_dispatch' && inputs.dry_run || 'false' }}
+        run: python scripts/run_story.py --slot "${{ github.event.schedule || 'manual' }}"
+
+      - name: Save rotation state
+        if: success()
+        run: |
+          if [[ -n "$(git status --porcelain state/history.json)" ]]; then
+            git config user.name  "mm-story-bot"
+            git config user.email "mm-story-bot@users.noreply.github.com"
+            git add state/history.json
+            git commit -m "rotation: $(date -u '+%Y-%m-%d %H:%M UTC')"
+            # Another slot may have pushed while this one was encoding.
+            for i in 1 2 3; do
+              git pull --rebase --autostash origin main && git push origin HEAD:main && exit 0
+              sleep $((i * 5))
+            done
+            echo "::warning::Could not push rotation state after 3 attempts."
+          else
+            echo "No rotation change to commit."
+          fi
