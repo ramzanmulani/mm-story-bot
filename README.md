@@ -1,7 +1,7 @@
 # MM Story Bot
 
 Re-shares your own Instagram videos to your **Instagram Story and your
-Facebook Page story** — 7 a day, spread roughly two hours apart,
+Facebook Page story** — 12 a day, every two hours around the clock,
 automatically, from GitHub Actions. Your PC does not need to be on.
 
 ---
@@ -154,7 +154,7 @@ Everything lives in `config.yaml`, no code changes needed.
 | Setting | Meaning |
 | --- | --- |
 | `targets.instagram` / `targets.facebook` / `targets.facebook_feed` | turn any of the three off |
-| `facebook.feed_posts_per_day` | `1` — set `7` to post a Page Reel every slot |
+| `facebook.feed_posts_per_day` | `1` — set `12` to post a Page Reel every slot |
 | `facebook.feed_caption` / `feed_caption_footer` | Page Reel caption; `{caption}` and `{permalink}` are filled in |
 | `facebook.page_id` | blank = the Page linked to your Instagram. Only set it if you manage several Pages |
 | `video.min_duration_sec` | `3` — Facebook's floor; shorter clips are looped |
