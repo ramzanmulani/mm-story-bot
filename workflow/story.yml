@@ -1,10 +1,16 @@
 name: Post Instagram story
 
-# 7 stories a day, ~2 hours apart, so the account keeps re-entering the
-# story tray instead of getting one bump in the morning.
-# Cron is UTC. These are 10:00 / 12:00 / 14:00 / 16:00 / 18:00 / 20:00 / 22:00 IST.
+# 12 stories a day, every 2 hours around the clock, so the account keeps
+# re-entering the story tray instead of going quiet overnight.
+# Cron is UTC. IST slots: 00:00 / 02:00 / 04:00 / 06:00 / 08:00 / 10:00 /
+# 12:00 / 14:00 / 16:00 / 18:00 / 20:00 / 22:00.
 on:
   schedule:
+    - cron: "30 18 * * *"   # 00:00 IST
+    - cron: "30 20 * * *"   # 02:00 IST
+    - cron: "30 22 * * *"   # 04:00 IST
+    - cron: "30 0 * * *"    # 06:00 IST
+    - cron: "30 2 * * *"    # 08:00 IST
     - cron: "30 4 * * *"    # 10:00 IST
     - cron: "30 6 * * *"    # 12:00 IST
     - cron: "30 8 * * *"    # 14:00 IST

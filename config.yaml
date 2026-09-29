@@ -22,8 +22,8 @@ facebook:
   page_id: ""
 
   # Feed posts are PERMANENT, so they are rationed separately from stories.
-  # 1 = one Page Reel a day (the other 6 slots still post stories).
-  # 7 = every slot also posts to the feed. That is a lot of permanent posts.
+  # 1 = one Page Reel a day (the other 11 slots still post stories).
+  # 12 = every slot also posts to the feed. That is a lot of permanent posts.
   feed_posts_per_day: 1
 
   # Caption for the Page Reel. {caption} is the original post's caption,
