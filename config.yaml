@@ -51,7 +51,7 @@ source:
   exclude_media_ids: []
 
   # How many of your posts to pull from the API (newest first).
-  max_library_size: 300
+  max_library_size: 50
 
 rotation:
   # Shuffle-bag: every eligible video is used exactly once before any repeats.
